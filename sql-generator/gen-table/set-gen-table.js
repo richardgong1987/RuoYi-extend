@@ -14,12 +14,12 @@ async function run() {
       if (!['menuId', 'icon', 'path'].includes(v)) {
         let itemElement = item[v];
         str += `
-UPDATE gen_table
-SET function_author='Richard',
-    package_name='com.ruoyi.${item.path.replace(/[-_]+/g,'')}',
-    module_name='${item.path}',
-    business_name='${itemElement.path}'
-WHERE table_comment = '${key}-${v}';
+          UPDATE gen_table
+          SET function_author='Richard',
+              package_name='com.ruoyi.${item.path.replace(/[-_]+/g, '')}',
+              module_name='${item.path}',
+              business_name='${itemElement.path}'
+          WHERE table_comment LIKE '%${key}-${v}%';
         `;
       }
     }
