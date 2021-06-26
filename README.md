@@ -13,6 +13,10 @@ https://github1s.com/richardgong1987/RuoYi-extend/commit/887119ba4df1bd7de4853b7
 https://github1s.com/richardgong1987/RuoYi-extend/commit/464d90485dd05b1e3508fa385d2d03ae289710a0
 ```
 
+### 添加lombak和更新代码生成模板
+```text
+https://github1s.com/richardgong1987/RuoYi-extend/commit/14735b13857a59dca2431d02d78b0cd103b84c2a
+```
 
 ## 内置功能
 
