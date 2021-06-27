@@ -15,7 +15,7 @@ import com.ruoyi.common.utils.uuid.IdUtils;
 
 /**
  * 文件上传工具类
- * 
+ *
  * @author ruoyi
  */
 public class FileUploadUtils
@@ -123,7 +123,7 @@ public class FileUploadUtils
     {
         String fileName = file.getOriginalFilename();
         String extension = getExtension(file);
-        fileName = DateUtils.datePath() + "/" + IdUtils.fastUUID() + "." + extension;
+        fileName = DateUtils.datePath() + "/" + fileName + "." + extension;
         return fileName;
     }
 
@@ -218,7 +218,7 @@ public class FileUploadUtils
 
     /**
      * 获取文件名的后缀
-     * 
+     *
      * @param file 表单文件
      * @return 后缀名
      */
