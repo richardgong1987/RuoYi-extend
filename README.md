@@ -18,6 +18,11 @@ https://github1s.com/richardgong1987/RuoYi-extend/commit/464d90485dd05b1e3508fa3
 https://github1s.com/richardgong1987/RuoYi-extend/commit/14735b13857a59dca2431d02d78b0cd103b84c2a
 ```
 
+### 去掉上传时hash编码文件名
+```text
+https://github1s.com/richardgong1987/RuoYi-extend/commit/b20204801ed02f43cf0175885a53b701c29ea025
+```
+
 ## 内置功能
 
 1.  用户管理：用户是系统操作者，该功能主要完成系统用户配置。
