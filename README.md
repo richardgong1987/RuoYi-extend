@@ -26,6 +26,9 @@ https://github1s.com/richardgong1987/RuoYi-extend/commit/b20204801ed02f43cf01758
 ```text
 https://github1s.com/richardgong1987/RuoYi-extend/commit/9edc2dbfcbf1076f8d6e1663e2bfa5c909215c1f
 ```
+```text
+https://github1s.com/richardgong1987/RuoYi-extend/commit/8aa8240c625c0bc46f09ee72ecf8ad727f310089
+```
 
 ## 内置功能
 
