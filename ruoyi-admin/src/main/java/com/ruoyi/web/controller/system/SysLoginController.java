@@ -41,6 +41,27 @@ public class SysLoginController extends BaseController
     @ResponseBody
     public AjaxResult ajaxLogin(String username, String password, Boolean rememberMe)
     {
+        ClientUsernamePasswordToken token = new ClientUsernamePasswordToken(username, password, rememberMe, LoginType.BACKEND.toString());
+        Subject subject = SecurityUtils.getSubject();
+        try
+        {
+            subject.login(token);
+            return success();
+        }
+        catch (AuthenticationException e)
+        {
+            String msg = "用户或密码错误";
+            if (StringUtils.isNotEmpty(e.getMessage()))
+            {
+                msg = e.getMessage();
+            }
+            return error(msg);
+        }
+    }
+    @PostMapping("/userlogin")
+    @ResponseBody
+    public AjaxResult ajaxuserloginLogin(String username, String password, Boolean rememberMe)
+    {
         ClientUsernamePasswordToken token = new ClientUsernamePasswordToken(username, password, rememberMe, LoginType.FRONTEND.toString());
         Subject subject = SecurityUtils.getSubject();
         try
