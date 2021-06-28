@@ -22,6 +22,10 @@ https://github1s.com/richardgong1987/RuoYi-extend/commit/14735b13857a59dca2431d0
 ```text
 https://github1s.com/richardgong1987/RuoYi-extend/commit/b20204801ed02f43cf0175885a53b701c29ea025
 ```
+### 新增:多realm的demo
+```text
+https://github1s.com/richardgong1987/RuoYi-extend/commit/9edc2dbfcbf1076f8d6e1663e2bfa5c909215c1f
+```
 
 ## 内置功能
 
