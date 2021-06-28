@@ -1,30 +1,12 @@
 package com.ruoyi.framework.config;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import javax.servlet.Filter;
-import org.apache.commons.io.IOUtils;
-import org.apache.shiro.cache.ehcache.EhCacheManager;
-import org.apache.shiro.codec.Base64;
-import org.apache.shiro.config.ConfigurationException;
-import org.apache.shiro.io.ResourceUtils;
-import org.apache.shiro.mgt.SecurityManager;
-import org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSourceAdvisor;
-import org.apache.shiro.spring.web.ShiroFilterFactoryBean;
-import org.apache.shiro.web.mgt.CookieRememberMeManager;
-import org.apache.shiro.web.mgt.DefaultWebSecurityManager;
-import org.apache.shiro.web.servlet.SimpleCookie;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+import at.pollux.thymeleaf.shiro.dialect.ShiroDialect;
 import com.ruoyi.common.constant.Constants;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.common.utils.security.CipherUtils;
 import com.ruoyi.common.utils.spring.SpringUtils;
+import com.ruoyi.framework.shiro.authc.CustomModularRealmAuthenticator;
+import com.ruoyi.framework.shiro.realm.ClientRealm;
 import com.ruoyi.framework.shiro.realm.UserRealm;
 import com.ruoyi.framework.shiro.session.OnlineSessionDAO;
 import com.ruoyi.framework.shiro.session.OnlineSessionFactory;
@@ -35,11 +17,33 @@ import com.ruoyi.framework.shiro.web.filter.online.OnlineSessionFilter;
 import com.ruoyi.framework.shiro.web.filter.sync.SyncOnlineSessionFilter;
 import com.ruoyi.framework.shiro.web.session.OnlineWebSessionManager;
 import com.ruoyi.framework.shiro.web.session.SpringSessionValidationScheduler;
-import at.pollux.thymeleaf.shiro.dialect.ShiroDialect;
+import org.apache.commons.io.IOUtils;
+import org.apache.shiro.authc.pam.ModularRealmAuthenticator;
+import org.apache.shiro.cache.ehcache.EhCacheManager;
+import org.apache.shiro.codec.Base64;
+import org.apache.shiro.config.ConfigurationException;
+import org.apache.shiro.io.ResourceUtils;
+import org.apache.shiro.mgt.SecurityManager;
+import org.apache.shiro.realm.Realm;
+import org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSourceAdvisor;
+import org.apache.shiro.spring.web.ShiroFilterFactoryBean;
+import org.apache.shiro.web.mgt.CookieRememberMeManager;
+import org.apache.shiro.web.mgt.DefaultWebSecurityManager;
+import org.apache.shiro.web.servlet.SimpleCookie;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+import javax.servlet.Filter;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.*;
 
 /**
  * 权限配置加载
- * 
+ *
  * @author ruoyi
  */
 @Configuration
@@ -168,16 +172,42 @@ public class ShiroConfig
         }
     }
 
-    /**
+//    /**
+//     * 自定义Realm
+//     */
+//    @Bean
+//    public UserRealm userRealm(EhCacheManager cacheManager)
+//    {
+//        UserRealm userRealm = new UserRealm();
+//        userRealm.setAuthorizationCacheName(Constants.SYS_AUTH_CACHE);
+//        userRealm.setCacheManager(cacheManager);
+//        return userRealm;
+//    }
+
+ /**
      * 自定义Realm
      */
     @Bean
-    public UserRealm userRealm(EhCacheManager cacheManager)
+    public Set<Realm> getRealmSet(EhCacheManager cacheManager)
     {
-        UserRealm userRealm = new UserRealm();
+        var userRealm = new UserRealm();
         userRealm.setAuthorizationCacheName(Constants.SYS_AUTH_CACHE);
         userRealm.setCacheManager(cacheManager);
-        return userRealm;
+
+        var clientUserRealm = new ClientRealm();
+        userRealm.setAuthorizationCacheName(Constants.SYS_AUTH_CACHE);
+        userRealm.setCacheManager(cacheManager);
+
+        Set<Realm> realms = new LinkedHashSet<>();
+        realms.add(userRealm);
+        realms.add(clientUserRealm);
+
+        return realms;
+    }
+
+    @Bean
+    public ModularRealmAuthenticator getModularRealmAuthenticator() {
+        return new ModularRealmAuthenticator();
     }
 
     /**
@@ -230,11 +260,12 @@ public class ShiroConfig
      * 安全管理器
      */
     @Bean
-    public SecurityManager securityManager(UserRealm userRealm)
+    public SecurityManager securityManager(Collection<Realm> realms, CustomModularRealmAuthenticator customModularRealmAuthenticator)
     {
         DefaultWebSecurityManager securityManager = new DefaultWebSecurityManager();
+        securityManager.setAuthenticator(customModularRealmAuthenticator);
         // 设置realm.
-        securityManager.setRealm(userRealm);
+        securityManager.setRealms(realms);
         // 记住我
         securityManager.setRememberMeManager(rememberMeManager());
         // 注入缓存管理器;
