@@ -39,9 +39,9 @@ public class SysLoginController extends BaseController
 
     @PostMapping("/login")
     @ResponseBody
-    public AjaxResult ajaxLogin(String username, String password, Boolean rememberMe)
+    public AjaxResult ajaxLogin(String username, String password, Boolean rememberMe,String googlecode)
     {
-        ClientUsernamePasswordToken token = new ClientUsernamePasswordToken(username, password, rememberMe, LoginType.BACKEND.toString());
+        ClientUsernamePasswordToken token = new ClientUsernamePasswordToken(username, password, rememberMe, LoginType.BACKEND.toString(),googlecode);
         Subject subject = SecurityUtils.getSubject();
         try
         {

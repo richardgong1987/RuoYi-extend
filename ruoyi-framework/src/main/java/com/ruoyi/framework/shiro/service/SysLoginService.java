@@ -1,29 +1,27 @@
 package com.ruoyi.framework.shiro.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 import com.ruoyi.common.constant.Constants;
 import com.ruoyi.common.constant.ShiroConstants;
 import com.ruoyi.common.constant.UserConstants;
 import com.ruoyi.common.core.domain.entity.SysUser;
 import com.ruoyi.common.enums.UserStatus;
-import com.ruoyi.common.exception.user.CaptchaException;
-import com.ruoyi.common.exception.user.UserBlockedException;
-import com.ruoyi.common.exception.user.UserDeleteException;
-import com.ruoyi.common.exception.user.UserNotExistsException;
-import com.ruoyi.common.exception.user.UserPasswordNotMatchException;
+import com.ruoyi.common.exception.user.*;
 import com.ruoyi.common.utils.DateUtils;
 import com.ruoyi.common.utils.MessageUtils;
 import com.ruoyi.common.utils.ServletUtils;
 import com.ruoyi.common.utils.ShiroUtils;
 import com.ruoyi.framework.manager.AsyncManager;
 import com.ruoyi.framework.manager.factory.AsyncFactory;
+import com.ruoyi.framework.web.service.GoogleCodeService;
 import com.ruoyi.system.service.ISysUserService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 /**
  * 登录校验方法
- * 
+ *
  * @author ruoyi
  */
 @Component
@@ -35,10 +33,16 @@ public class SysLoginService
     @Autowired
     private ISysUserService userService;
 
+    @Value(value = "${user.googleAuthenticator}")
+    private boolean googleAuthenticator;
+
+    @Autowired
+    GoogleCodeService googleCodeService;
+
     /**
      * 登录
      */
-    public SysUser login(String username, String password)
+    public SysUser login( String username, String password,String googlecode)
     {
         // 验证码校验
         if (ShiroConstants.CAPTCHA_ERROR.equals(ServletUtils.getRequest().getAttribute(ShiroConstants.CURRENT_CAPTCHA)))
@@ -70,7 +74,9 @@ public class SysLoginService
 
         // 查询用户信息
         SysUser user = userService.selectUserByLoginName(username);
-
+        if (this.googleAuthenticator) {
+            googleCodeService.verifyGooglecode(user, googlecode);
+        }
         /**
         if (user == null && maybeMobilePhoneNumber(username))
         {
@@ -88,13 +94,13 @@ public class SysLoginService
             AsyncManager.me().execute(AsyncFactory.recordLogininfor(username, Constants.LOGIN_FAIL, MessageUtils.message("user.not.exists")));
             throw new UserNotExistsException();
         }
-        
+
         if (UserStatus.DELETED.getCode().equals(user.getDelFlag()))
         {
             AsyncManager.me().execute(AsyncFactory.recordLogininfor(username, Constants.LOGIN_FAIL, MessageUtils.message("user.password.delete")));
             throw new UserDeleteException();
         }
-        
+
         if (UserStatus.DISABLE.getCode().equals(user.getStatus()))
         {
             AsyncManager.me().execute(AsyncFactory.recordLogininfor(username, Constants.LOGIN_FAIL, MessageUtils.message("user.blocked", user.getRemark())));

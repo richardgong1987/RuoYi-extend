@@ -73,6 +73,9 @@ public class ShiroConfig
     @Value("${shiro.user.captchaType}")
     private String captchaType;
 
+    @Value(value = "${user.googleAuthenticator}")
+    private boolean googleAuthenticator;
+
     /**
      * 设置Cookie的域名
      */
@@ -291,6 +294,7 @@ public class ShiroConfig
     public CaptchaValidateFilter captchaValidateFilter()
     {
         CaptchaValidateFilter captchaValidateFilter = new CaptchaValidateFilter();
+        captchaValidateFilter.setGoogleAuthenticator(googleAuthenticator);
         captchaValidateFilter.setCaptchaEnabled(captchaEnabled);
         captchaValidateFilter.setCaptchaType(captchaType);
         return captchaValidateFilter;

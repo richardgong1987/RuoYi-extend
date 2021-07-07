@@ -1,17 +1,18 @@
 package com.ruoyi.framework.shiro.web.filter.captcha;
 
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
-import org.apache.shiro.web.filter.AccessControlFilter;
 import com.google.code.kaptcha.Constants;
 import com.ruoyi.common.constant.ShiroConstants;
 import com.ruoyi.common.utils.ShiroUtils;
 import com.ruoyi.common.utils.StringUtils;
+import org.apache.shiro.web.filter.AccessControlFilter;
+
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * 验证码过滤器
- * 
+ *
  * @author ruoyi
  */
 public class CaptchaValidateFilter extends AccessControlFilter
@@ -20,6 +21,10 @@ public class CaptchaValidateFilter extends AccessControlFilter
      * 是否开启验证码
      */
     private boolean captchaEnabled = true;
+    /**
+     * 是否开启谷歌验证码
+     */
+    private boolean googleAuthenticator = true;
 
     /**
      * 验证码类型
@@ -40,6 +45,7 @@ public class CaptchaValidateFilter extends AccessControlFilter
     public boolean onPreHandle(ServletRequest request, ServletResponse response, Object mappedValue) throws Exception
     {
         request.setAttribute(ShiroConstants.CURRENT_ENABLED, captchaEnabled);
+        request.setAttribute(ShiroConstants.GOOGLE_AUTHENTICATOR, googleAuthenticator);
         request.setAttribute(ShiroConstants.CURRENT_TYPE, captchaType);
         return super.onPreHandle(request, response, mappedValue);
     }
@@ -75,5 +81,13 @@ public class CaptchaValidateFilter extends AccessControlFilter
     {
         request.setAttribute(ShiroConstants.CURRENT_CAPTCHA, ShiroConstants.CAPTCHA_ERROR);
         return true;
+    }
+
+    public boolean isGoogleAuthenticator() {
+        return googleAuthenticator;
+    }
+
+    public void setGoogleAuthenticator(boolean googleAuthenticator) {
+        this.googleAuthenticator = googleAuthenticator;
     }
 }

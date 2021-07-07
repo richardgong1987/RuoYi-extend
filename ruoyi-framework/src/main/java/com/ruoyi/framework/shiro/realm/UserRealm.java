@@ -3,6 +3,7 @@ package com.ruoyi.framework.shiro.realm;
 import com.ruoyi.common.core.domain.entity.SysUser;
 import com.ruoyi.common.exception.user.*;
 import com.ruoyi.common.utils.ShiroUtils;
+import com.ruoyi.framework.shiro.authc.ClientUsernamePasswordToken;
 import com.ruoyi.framework.shiro.service.SysLoginService;
 import com.ruoyi.system.service.ISysMenuService;
 import com.ruoyi.system.service.ISysRoleService;
@@ -76,7 +77,7 @@ public class UserRealm extends AuthorizingRealm
     @Override
     protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken token) throws AuthenticationException
     {
-        UsernamePasswordToken upToken = (UsernamePasswordToken) token;
+        ClientUsernamePasswordToken upToken = (ClientUsernamePasswordToken) token;
         String username = upToken.getUsername();
         String password = "";
         if (upToken.getPassword() != null)
@@ -87,7 +88,7 @@ public class UserRealm extends AuthorizingRealm
         SysUser user = null;
         try
         {
-            user = loginService.login(username, password);
+            user = loginService.login(username, password,upToken.getGooglecode());
         }
         catch (CaptchaException e)
         {

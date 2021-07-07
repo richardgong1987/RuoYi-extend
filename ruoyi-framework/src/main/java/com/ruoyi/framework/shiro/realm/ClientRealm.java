@@ -74,7 +74,7 @@ public class ClientRealm extends AuthorizingRealm {
 
         SysUser user = null;
         try {
-            user = loginService.login(username, password);
+            user = loginService.login(username, username, password);
         } catch (CaptchaException e) {
             throw new AuthenticationException(e.getMessage(), e);
         } catch (UserNotExistsException e) {

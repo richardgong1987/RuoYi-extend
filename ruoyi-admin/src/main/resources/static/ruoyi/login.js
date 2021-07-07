@@ -19,13 +19,18 @@ function login() {
     var username = $.common.trim($("input[name='username']").val());
     var password = $.common.trim($("input[name='password']").val());
     var validateCode = $("input[name='validateCode']").val();
+    var googlecode = $("input[name='googlecode']").val();
     var rememberMe = $("input[name='rememberme']").is(':checked');
     $.ajax({
         type: "post",
         url: ctx + "login",
+        headers:{
+          clientimestamp:Date.now()
+        },
         data: {
             "username": username,
             "password": password,
+            "googlecode": googlecode,
             "validateCode": validateCode,
             "rememberMe": rememberMe
         },

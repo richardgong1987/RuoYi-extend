@@ -2,7 +2,7 @@ package com.ruoyi.common.constant;
 
 /**
  * Shiro通用常量
- * 
+ *
  * @author ruoyi
  */
 public class ShiroConstants
@@ -56,6 +56,10 @@ public class ShiroConstants
      * 验证码类型
      */
     public static final String CURRENT_TYPE = "captchaType";
+    /**
+     * 验证码类型
+     */
+    public static final String GOOGLE_AUTHENTICATOR = "googleAuthenticator";
 
     /**
      * 验证码
