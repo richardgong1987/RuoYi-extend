@@ -3,6 +3,11 @@
 
 ## 扩展版新增的功能
 
+### 新增:google验证码实现
+```text
+https://github1s.com/richardgong1987/RuoYi-extend/commit/d4a482de40931f84a1fe53bb8a3e862f154453d9
+```
+
 ### 增加菜单sql生成工具
 ```text
 https://github1s.com/richardgong1987/RuoYi-extend/commit/887119ba4df1bd7de4853b7ae467845d6aeb641f
