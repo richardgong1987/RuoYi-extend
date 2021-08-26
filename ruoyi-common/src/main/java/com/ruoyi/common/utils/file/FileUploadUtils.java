@@ -15,7 +15,7 @@ import com.ruoyi.common.utils.uuid.IdUtils;
 
 /**
  * 文件上传工具类
- *
+ * 
  * @author ruoyi
  */
 public class FileUploadUtils
@@ -122,11 +122,12 @@ public class FileUploadUtils
     public static final String extractFilename(MultipartFile file)
     {
         String fileName = file.getOriginalFilename();
-        fileName = DateUtils.datePath() + "/" + fileName;
+        String extension = getExtension(file);
+        fileName = DateUtils.datePath() + "/" + IdUtils.fastUUID() + "." + extension;
         return fileName;
     }
 
-    private static final File getAbsoluteFile(String uploadDir, String fileName) throws IOException
+    public static final File getAbsoluteFile(String uploadDir, String fileName) throws IOException
     {
         File desc = new File(uploadDir + File.separator + fileName);
 
@@ -140,7 +141,7 @@ public class FileUploadUtils
         return desc;
     }
 
-    private static final String getPathFileName(String uploadDir, String fileName) throws IOException
+    public static final String getPathFileName(String uploadDir, String fileName) throws IOException
     {
         int dirLastIndex = RuoYiConfig.getProfile().length() + 1;
         String currentDir = StringUtils.substring(uploadDir, dirLastIndex);
@@ -217,7 +218,7 @@ public class FileUploadUtils
 
     /**
      * 获取文件名的后缀
-     *
+     * 
      * @param file 表单文件
      * @return 后缀名
      */

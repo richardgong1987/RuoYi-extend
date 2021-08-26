@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import com.ruoyi.common.annotation.Log;
 import com.ruoyi.common.constant.Constants;
@@ -133,11 +134,19 @@ public class SysJobController extends BaseController
     {
         if (!CronUtils.isValid(job.getCronExpression()))
         {
-            return AjaxResult.error("新增任务'" + job.getJobName() + "'失败，Cron表达式不正确");
+            return error("新增任务'" + job.getJobName() + "'失败，Cron表达式不正确");
         }
         else if (StringUtils.containsIgnoreCase(job.getInvokeTarget(), Constants.LOOKUP_RMI))
         {
-            return AjaxResult.error("新增任务'" + job.getJobName() + "'失败，目标字符串不允许'rmi://'调用");
+            return error("新增任务'" + job.getJobName() + "'失败，目标字符串不允许'rmi://'调用");
+        }
+        else if (StringUtils.containsIgnoreCase(job.getInvokeTarget(), Constants.LOOKUP_LDAP))
+        {
+            return error("新增任务'" + job.getJobName() + "'失败，目标字符串不允许'ldap://'调用");
+        }
+        else if (StringUtils.containsAnyIgnoreCase(job.getInvokeTarget(), new String[] { Constants.HTTP, Constants.HTTPS }))
+        {
+            return error("新增任务'" + job.getJobName() + "'失败，目标字符串不允许'http(s)//'调用");
         }
         return toAjax(jobService.insertJob(job));
     }
@@ -163,11 +172,19 @@ public class SysJobController extends BaseController
     {
         if (!CronUtils.isValid(job.getCronExpression()))
         {
-            return AjaxResult.error("修改任务'" + job.getJobName() + "'失败，Cron表达式不正确");
+            return error("修改任务'" + job.getJobName() + "'失败，Cron表达式不正确");
         }
         else if (StringUtils.containsIgnoreCase(job.getInvokeTarget(), Constants.LOOKUP_RMI))
         {
-            return AjaxResult.error("修改任务'" + job.getJobName() + "'失败，目标字符串不允许'rmi://'调用");
+            return error("修改任务'" + job.getJobName() + "'失败，目标字符串不允许'rmi://'调用");
+        }
+        else if (StringUtils.containsIgnoreCase(job.getInvokeTarget(), Constants.LOOKUP_LDAP))
+        {
+            return error("修改任务'" + job.getJobName() + "'失败，目标字符串不允许'ldap://'调用");
+        }
+        else if (StringUtils.containsAnyIgnoreCase(job.getInvokeTarget(), new String[] { Constants.HTTP, Constants.HTTPS }))
+        {
+            return error("修改任务'" + job.getJobName() + "'失败，目标字符串不允许'http(s)//'调用");
         }
         return toAjax(jobService.updateJob(job));
     }
@@ -180,5 +197,32 @@ public class SysJobController extends BaseController
     public boolean checkCronExpressionIsValid(SysJob job)
     {
         return jobService.checkCronExpressionIsValid(job.getCronExpression());
+    }
+
+    /**
+     * Cron表达式在线生成
+     */
+    @GetMapping("/cron")
+    public String cron()
+    {
+        return prefix + "/cron";
+    }
+
+    /**
+     * 查询cron表达式近5次的执行时间
+     */
+    @GetMapping("/queryCronExpression")
+    @ResponseBody
+    public AjaxResult queryCronExpression(@RequestParam(value = "cronExpression", required = false) String cronExpression)
+    {
+        if (jobService.checkCronExpressionIsValid(cronExpression))
+        {
+            List<String> dateList = CronUtils.getRecentTriggerTime(cronExpression);
+            return success(dateList);
+        }
+        else
+        {
+            return error("表达式无效");
+        }
     }
 }

@@ -119,6 +119,12 @@ public class ShiroConfig
     private String unauthorizedUrl;
 
     /**
+     * 是否开启记住我功能
+     */
+    @Value("${shiro.rememberMe.enabled: false}")
+    private boolean rememberMe;
+
+    /**
      * redis缓存地址
      */
     @Value("${spring.redis.port}")
@@ -221,7 +227,7 @@ public class ShiroConfig
         // 设置realm.
         securityManager.setRealm(userRealm);
         // 记住我
-        securityManager.setRememberMeManager(rememberMeManager());
+        securityManager.setRememberMeManager(rememberMe ? rememberMeManager() : null);
         // 注入缓存管理器;
         securityManager.setCacheManager(redisCacheManager());
         // session管理器

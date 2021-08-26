@@ -1,5 +1,19 @@
 package com.ruoyi.web.controller.system;
 
+import java.util.List;
+import java.util.stream.Collectors;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.ModelMap;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
 import com.ruoyi.common.annotation.Log;
 import com.ruoyi.common.constant.UserConstants;
 import com.ruoyi.common.core.controller.BaseController;
@@ -7,6 +21,7 @@ import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.domain.entity.SysRole;
 import com.ruoyi.common.core.domain.entity.SysUser;
 import com.ruoyi.common.core.page.TableDataInfo;
+import com.ruoyi.common.core.text.Convert;
 import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.common.utils.ShiroUtils;
 import com.ruoyi.common.utils.StringUtils;
@@ -85,8 +100,7 @@ public class SysUserController extends BaseController
     {
         ExcelUtil<SysUser> util = new ExcelUtil<SysUser>(SysUser.class);
         List<SysUser> userList = util.importExcel(file.getInputStream());
-        String operName = ShiroUtils.getSysUser().getLoginName();
-        String message = userService.importUser(userList, updateSupport, operName);
+        String message = userService.importUser(userList, updateSupport, getLoginName());
         return AjaxResult.success(message);
     }
 
@@ -135,7 +149,7 @@ public class SysUserController extends BaseController
         }
         user.setSalt(ShiroUtils.randomSalt());
         user.setPassword(passwordService.encryptPassword(user.getLoginName(), user.getPassword(), user.getSalt()));
-        user.setCreateBy(ShiroUtils.getLoginName());
+        user.setCreateBy(getLoginName());
         return toAjax(userService.insertUser(user));
     }
 
@@ -145,6 +159,7 @@ public class SysUserController extends BaseController
     @GetMapping("/edit/{userId}")
     public String edit(@PathVariable("userId") Long userId, ModelMap mmap)
     {
+        userService.checkUserDataScope(userId);
         List<SysRole> roles = roleService.selectRolesByUserId(userId);
         mmap.put("user", userService.selectUserById(userId));
         mmap.put("roles", SysUser.isAdmin(userId) ? roles : roles.stream().filter(r -> !r.isAdmin()).collect(Collectors.toList()));
@@ -172,7 +187,7 @@ public class SysUserController extends BaseController
         {
             return error("修改用户'" + user.getLoginName() + "'失败，邮箱账号已存在");
         }
-        user.setUpdateBy(ShiroUtils.getLoginName());
+        user.setUpdateBy(getLoginName());
         return toAjax(userService.updateUser(user));
     }
     /**
@@ -212,7 +227,7 @@ public class SysUserController extends BaseController
         {
             if (ShiroUtils.getUserId().longValue() == user.getUserId().longValue())
             {
-                ShiroUtils.setSysUser(userService.selectUserById(user.getUserId()));
+                setSysUser(userService.selectUserById(user.getUserId()));
             }
             return success();
         }
@@ -252,6 +267,10 @@ public class SysUserController extends BaseController
     @ResponseBody
     public AjaxResult remove(String ids)
     {
+        if (ArrayUtils.contains(Convert.toLongArray(ids), getUserId()))
+        {
+            return error("当前用户不能删除");
+        }
         return toAjax(userService.deleteUserByIds(ids));
     }
 
