@@ -250,7 +250,7 @@ var table = {
                     if($.common.equals("self", target)) {
                         var height = $(this).data('height');
                         var width = $(this).data('width');
-                        layer.open({
+                        top.layer.open({
                             title: false,
                             type: 1,
                             closeBtn: true,
@@ -270,7 +270,7 @@ var table = {
                         input.select();
                         document.execCommand("copy");
                     } else if ($.common.equals("open", target)) {
-                        parent.layer.alert(input.val(), {
+                        top.layer.alert(input.val(), {
                             title: "信息内容",
                             shadeClose: true,
                             btn: ['确认'],
@@ -388,8 +388,7 @@ var table = {
             },
             // 下载模板
             importTemplate: function() {
-                table.set();
-                $.get(table.options.importTemplateUrl, function(result) {
+                $.get(activeWindow().table.options.importTemplateUrl, function(result) {
                     if (result.code == web_status.SUCCESS) {
                         window.location.href = ctx + "common/download?fileName=" + encodeURI(result.msg) + "&delete=" + true;
                     } else if (result.code == web_status.WARNING) {
@@ -405,7 +404,7 @@ var table = {
                 var currentId = $.common.isEmpty(formId) ? 'importTpl' : formId;
                 var _width = $.common.isEmpty(width) ? "400" : width;
                 var _height = $.common.isEmpty(height) ? "230" : height;
-                layer.open({
+                top.layer.open({
                     type: 1,
                     area: [_width + 'px', _height + 'px'],
                     fix: false,
@@ -423,7 +422,7 @@ var table = {
                             $.modal.msgWarning("请选择后缀为 “xls”或“xlsx”的文件。");
                             return false;
                         }
-                        var index = layer.load(2, {shade: false});
+                        var index = top.layer.load(2, {shade: false});
                         $.modal.disable();
                         var formData = new FormData(layero.find('form')[0]);
                         $.ajax({
@@ -435,15 +434,16 @@ var table = {
                             type: 'POST',
                             success: function (result) {
                                 if (result.code == web_status.SUCCESS) {
+                                	$.modal.close(index);
                                     $.modal.closeAll();
                                     $.modal.alertSuccess(result.msg);
                                     $.table.refresh();
                                 } else if (result.code == web_status.WARNING) {
-                                    layer.close(index);
+                                	$.modal.close(index);
                                     $.modal.enable();
                                     $.modal.alertWarning(result.msg)
                                 } else {
-                                    layer.close(index);
+                                    $.modal.close(index);
                                     $.modal.enable();
                                     $.modal.alertError(result.msg);
                                 }
@@ -680,6 +680,14 @@ var table = {
                 } else if (table.options.type == table_type.bootstrapTreeTable) {
                     $("#" + tableId).bootstrapTreeTable('refresh', []);
                 }
+                if ($.common.isNotEmpty(startLayDate) && $.common.isNotEmpty(endLayDate)) {
+                    endLayDate.config.min.year = '';
+                    endLayDate.config.min.month = '';
+                    endLayDate.config.min.date = '';
+                    startLayDate.config.max.year = '2099';
+                    startLayDate.config.max.month = '12';
+                    startLayDate.config.max.date = '31';
+                 }
             },
             // 获取选中复选框项
             selectCheckeds: function(name) {
@@ -725,9 +733,9 @@ var table = {
             // 消息提示
             msg: function(content, type) {
                 if (type != undefined) {
-                    layer.msg(content, { icon: $.modal.icon(type), time: 1000, shift: 5 });
+                	top.layer.msg(content, { icon: $.modal.icon(type), time: 1000, shift: 5 });
                 } else {
-                    layer.msg(content);
+                	top.layer.msg(content);
                 }
             },
             // 错误消息
@@ -744,22 +752,11 @@ var table = {
             },
             // 弹出提示
             alert: function(content, type) {
-                layer.alert(content, {
+                top.layer.alert(content, {
                     icon: $.modal.icon(type),
                     title: "系统提示",
                     btn: ['确认'],
                     btnclass: ['btn btn-primary'],
-                });
-            },
-            // 消息提示并刷新父窗体
-            msgReload: function(msg, type) {
-                layer.msg(msg, {
-                    icon: $.modal.icon(type),
-                    time: 500,
-                    shade: [0.1, '#8F8F8F']
-                },
-                function() {
-                    $.modal.reload();
                 });
             },
             // 错误提示
@@ -774,27 +771,51 @@ var table = {
             alertWarning: function(content) {
                 $.modal.alert(content, modal_status.WARNING);
             },
+            // 消息提示，重新加载页面
+            msgReload: function(msg, type) {
+                top.layer.msg(msg, {
+                    icon: $.modal.icon(type),
+                    time: 500,
+                    shade: [0.1, '#8F8F8F']
+                },
+                function() {
+                    $.modal.reload();
+                });
+            },
+            // 消息提示成功并刷新父窗体
+            msgSuccessReload: function(msg) {
+            	$.modal.msgReload(msg, modal_status.SUCCESS);
+            },
+            // 获取iframe页的DOM
+            getChildFrame: function (index) {
+                if($.common.isEmpty(index)){
+                    var index = parent.layer.getFrameIndex(window.name);
+                    return parent.layer.getChildFrame('body', index);
+                } else {
+                    return top.layer.getChildFrame('body', index);
+                }
+            },
             // 关闭窗体
             close: function (index) {
                 if($.common.isEmpty(index)){
                     var index = parent.layer.getFrameIndex(window.name);
                     parent.layer.close(index);
                 } else {
-                    layer.close(index);
+                    top.layer.close(index);
                 }
             },
             // 关闭全部窗体
             closeAll: function () {
-                layer.closeAll();
+                top.layer.closeAll();
             },
             // 确认窗体
             confirm: function (content, callBack) {
-                layer.confirm(content, {
+                top.layer.confirm(content, {
                     icon: 3,
                     title: "系统提示",
                     btn: ['确认', '取消']
                 }, function (index) {
-                    layer.close(index);
+                    $.modal.close(index);
                     callBack(true);
                 });
             },
@@ -823,7 +844,7 @@ var table = {
                         iframeWin.contentWindow.submitHandler(index, layero);
                     }
                 }
-                layer.open({
+                top.layer.open({
                     type: 2,
                     area: [width + 'px', height + 'px'],
                     fix: false,
@@ -867,7 +888,9 @@ var table = {
                         }
                     }
                 }
-                var index = layer.open($.extend({
+                var index = top.layer.open($.extend({
+                    id: options.id,       // 唯一id
+                    anim: options.anim,   // 弹出动画 0-6
                     type: 2,
                     maxmin: $.common.isEmpty(options.maxmin) ? true : options.maxmin,
                     shade: 0.3,
@@ -877,6 +900,7 @@ var table = {
                     content: _url,
                     shadeClose: $.common.isEmpty(options.shadeClose) ? true : options.shadeClose,
                     skin: options.skin,
+                    // options.btn设置为0表示不显示按钮
                     btn: $.common.isEmpty(options.btn) ? _btn : options.btn,
                     yes: options.yes,
                     cancel: function () {
@@ -906,7 +930,7 @@ var table = {
                 if ($.common.isEmpty(height)) {
                     height = ($(window).height() - 50);
                 }
-                var index = layer.open({
+                var index = top.layer.open({
                     type: 2,
                     area: [width + 'px', height + 'px'],
                     fix: false,
@@ -926,7 +950,7 @@ var table = {
                         return true;
                     }
                 });
-                layer.full(index);
+                top.layer.full(index);
             },
             // 选卡页方式打开
             openTab: function (title, url, isRefresh) {
@@ -1008,7 +1032,7 @@ var table = {
                     skin: 'layui-layer-gray', 
                     btn: ['关闭'],
                     yes: function (index, layero) {
-                        layer.close(index);
+                        $.modal.close(index);
                     }
                 };
                 $.modal.openOptions(options);
@@ -1164,7 +1188,7 @@ var table = {
                 };
                 $.ajax(config)
             },
-            // 保存信息 弹出提示框
+            // 保存信息 弹出结果提示框
             saveModal: function(url, data, callback) {
                 var config = {
                     url: url,
@@ -1226,10 +1250,10 @@ var table = {
                 }
                 $.modal.closeLoading();
             },
-            // 成功结果提示msg（父窗体全局更新）
-            saveSuccess: function (result) {
+            // 保存结果重新加载页面
+            saveReload: function (result) {
                 if (result.code == web_status.SUCCESS) {
-                    $.modal.msgReload("保存成功,正在刷新数据请稍后……", modal_status.SUCCESS);
+                    $.modal.msgSuccessReload(result.msg);
                 } else if (result.code == web_status.WARNING) {
                     $.modal.alertWarning(result.msg)
                 }  else {
@@ -1240,8 +1264,10 @@ var table = {
             // 成功回调执行事件（父窗体静默更新）
             successCallback: function(result) {
                 if (result.code == web_status.SUCCESS) {
-                    var parent = window.parent;
-                    if (parent.table.options.type == table_type.bootstrapTable) {
+                    var parent = activeWindow();
+                    if($.common.isEmpty(parent.table)) {
+                    	$.modal.msgSuccessReload(result.msg);
+                    } else if (parent.table.options.type == table_type.bootstrapTable) {
                         $.modal.close();
                         parent.$.modal.msgSuccess(result.msg);
                         parent.$.table.refresh();
@@ -1249,8 +1275,6 @@ var table = {
                         $.modal.close();
                         parent.$.modal.msgSuccess(result.msg);
                         parent.$.treeTable.refresh();
-                    } else {
-                        $.modal.msgReload("保存成功,正在刷新数据请稍后……", modal_status.SUCCESS);
                     }
                 } else if (result.code == web_status.WARNING) {
                     $.modal.alertWarning(result.msg)

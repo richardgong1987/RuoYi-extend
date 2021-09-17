@@ -2,6 +2,9 @@
  * 通用方法封装处理
  * Copyright (c) 2019 ruoyi 
  */
+
+var startLayDate;
+var endLayDate;
 $(function() {
 	
     //  layer扩展皮肤
@@ -48,7 +51,7 @@ $(function() {
     if ($(".select-time").length > 0) {
        layui.use('laydate', function() {
             var laydate = layui.laydate;
-            var startDate = laydate.render({
+            startLayDate = laydate.render({
                 elem: '#startTime',
                 max: $('#endTime').val(),
                 theme: 'molv',
@@ -57,17 +60,17 @@ $(function() {
                 done: function(value, date) {
                     // 结束时间大于开始时间
                     if (value !== '') {
-                        endDate.config.min.year = date.year;
-                        endDate.config.min.month = date.month - 1;
-                        endDate.config.min.date = date.date;
+                        endLayDate.config.min.year = date.year;
+                        endLayDate.config.min.month = date.month - 1;
+                        endLayDate.config.min.date = date.date;
                     } else {
-                        endDate.config.min.year = '';
-                        endDate.config.min.month = '';
-                        endDate.config.min.date = '';
+                        endLayDate.config.min.year = '';
+                        endLayDate.config.min.month = '';
+                        endLayDate.config.min.date = '';
                     }
                 }
             });
-            var endDate = laydate.render({
+            endLayDate = laydate.render({
                 elem: '#endTime',
                 min: $('#startTime').val(),
                 theme: 'molv',
@@ -76,13 +79,13 @@ $(function() {
                 done: function(value, date) {
                     // 开始时间小于结束时间
                     if (value !== '') {
-                        startDate.config.max.year = date.year;
-                        startDate.config.max.month = date.month - 1;
-                        startDate.config.max.date = date.date;
+                        startLayDate.config.max.year = date.year;
+                        startLayDate.config.max.month = date.month - 1;
+                        startLayDate.config.max.date = date.date;
                     } else {
-                        startDate.config.max.year = '2099';
-                        startDate.config.max.month = '12';
-                        startDate.config.max.date = '31';
+                        startLayDate.config.max.year = '2099';
+                        startLayDate.config.max.month = '12';
+                        startLayDate.config.max.date = '31';
                     }
                 }
             });
@@ -287,7 +290,7 @@ function createMenuItem(dataUrl, menuName, isRefresh) {
         $('.mainContent', topWindow).find('iframe.RuoYi_iframe').hide().parents('.mainContent').append(str1);
         
         window.parent.$.modal.loading("数据加载中，请稍后...");
-        $('.mainContent iframe:visible', topWindow).load(function () {
+        $('.mainContent iframe:visible', topWindow).on('load', function() {
             window.parent.$.modal.closeLoading();
         });
 
@@ -335,13 +338,21 @@ function scrollToTab(element) {
     $('.page-tabs-content', topWindow).animate({ marginLeft: 0 - scrollVal + 'px' }, "fast");
 }
 
-//计算元素集合的总宽度
+// 计算元素集合的总宽度
 function calSumWidth(elements) {
     var width = 0;
     $(elements).each(function() {
         width += $(this).outerWidth(true);
     });
     return width;
+}
+
+// 返回当前激活的Tab页面关联的iframe的Windows对象
+function activeWindow() {
+	var topWindow = $(window.parent.document);
+	var currentId = $('.page-tabs-content', topWindow).find('.active').attr('data-id');
+	var activeWindow = $('.RuoYi_iframe[data-id="' + currentId + '"]', topWindow)[0].contentWindow;
+    return activeWindow;
 }
 
 /** 密码规则范围验证 */
@@ -477,6 +488,38 @@ function loadJs(file, headElem) {
     script.type = 'text/javascript';
     if (headElem) headElem.appendChild(script);
     else document.getElementsByTagName('head')[0].appendChild(script);
+}
+
+// 禁止后退键（Backspace）
+window.onload = function() {
+	document.getElementsByTagName("body")[0].onkeydown = function() {
+		// 获取事件对象  
+		var elem = event.relatedTarget || event.srcElement || event.target || event.currentTarget;
+		// 判断按键为backSpace键  
+		if (event.keyCode == 8) {
+			// 判断是否需要阻止按下键盘的事件默认传递  
+			var name = elem.nodeName;
+			if (name != 'INPUT' && name != 'TEXTAREA') {
+				return _stopIt(event);
+			}
+			var type_e = elem.type.toUpperCase();
+			if (name == 'INPUT' && (type_e != 'TEXT' && type_e != 'TEXTAREA' && type_e != 'PASSWORD' && type_e != 'FILE')) {
+				return _stopIt(event);
+			}
+			if (name == 'INPUT' && (elem.readOnly == true || elem.disabled == true)) {
+				return _stopIt(event);
+			}
+		}
+	};
+};
+function _stopIt(e) {
+	if (e.returnValue) {
+		e.returnValue = false;
+	}
+	if (e.preventDefault) {
+		e.preventDefault();
+	}
+	return false;
 }
 
 /** 设置全局ajax处理 */
